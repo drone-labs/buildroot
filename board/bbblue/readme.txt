@@ -23,11 +23,9 @@ Result of the build
 ===================
 output/images/
 ├── am335x-boneblue.dtb
-├── am335x-evm.dtb
 ├── boot.vfat
 ├── MLO
 ├── rootfs.ext2
-├── rootfs.tar
 ├── sdcard.img
 ├── u-boot.img
 ├── uEnv.txt
