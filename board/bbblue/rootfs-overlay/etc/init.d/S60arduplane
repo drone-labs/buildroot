@@ -1,0 +1,121 @@
+#!/bin/sh
+
+# Exit immediately if a command exits with a non-zero exit status
+# set -e
+
+VERB="$1"
+shift
+
+AP_DIR=/usr/bin/ardupilot
+PROGRAM=arduplane
+
+# -A Switch
+AP_CONSOLE="/dev/ttyS1"
+# -B Switch
+AP_GPS="/dev/ttyS2"
+# -C Switch
+AP_TELEM1="/dev/ttyS5"
+# -D Switch
+#AP_TELEM2="/dev/ttyS5"
+# -E Switch
+#AP_UNAMED1="/dev/ttyS5"
+# -F Switch
+#AP_UNAMED2="/dev/ttyS5"
+# -G Switch
+#AP_UNAMED3="/dev/ttyS5"
+# -H Switch
+#AP_UNAMED4="/dev/ttyS5"
+
+# -l Switch
+AP_LOG_DIR="/var/APM/logs"
+# -t Switch
+AP_MAP_DIR="/var/APM/terrain"
+# -M Switch
+AP_MOD_DIR="/usr/lib/ardupilot"
+
+loadlist="uio uio_pruss uio_pdrv_genirq inv_mpu6050 bmp280 ak8975"
+unloadlist="ak8975 bmp280 inv_mpu6050 uio_pdrv_genirq uio_pruss uio"
+
+# Function to load modules
+function loadmodules {
+  for module in ${loadlist}
+    do
+      lsmod | grep ${module} > /dev/null 2>&1
+      if [[ $? -eq 1 ]]; then
+        echo -n "Loading ${module} ... "
+        modprobe ${module}
+        sleep 0.2
+        echo "OK"
+      else
+        echo "${module} Already loaded"
+      fi
+    done
+}
+# END loadmodules
+
+# Function to unload modules
+function unloadmodules {
+  for module in ${unloadlist}
+    do
+      lsmod | grep ${module} > /dev/null 2>&1
+      if [[ $? -eq 0 ]]; then
+        echo -n "Unloading ${module} ... "
+        rmmod ${module}
+        sleep 0.2
+        echo "OK"
+      else
+        echo "${module} is not loaded"
+      fi
+    done
+}
+# END unloadmodules
+
+#-----------------------------------------------------------------------------------
+case "$VERB" in
+  start)
+    echo "Starting ${PROGRAM}..."
+    # Load Modules
+    loadmodules
+
+    # Start program in background
+    APPID=`pidof ${PROGRAM}`
+    if [ s${APPID} = "s" ]; then
+      ${AP_DIR}/${PROGRAM} -l ${AP_LOG_DIR} -A ${AP_CONSOLE} -B ${AP_GPS} -C ${AP_TELEM1}&
+    else
+      echo "An instance of ${PROGRAM} is already running..."
+    fi
+    echo "OK"
+    ;;
+
+  stop)
+    echo -n "Stopping ${PROGRAM}: "
+    APPID=`pidof ${PROGRAM}`
+    if [ "s${APPID}" = "s" ]; then
+      echo
+      echo "${PROGRAM} is not running!"
+    else
+      kill -9 $APPID
+      echo "OK"
+    fi
+    ;;
+
+  restart)
+    $0 stop
+    sleep 2
+    $0 start
+    ;;
+
+  reload)
+    $0 stop
+    unloadmodules
+    sleep 2
+    loadmodules
+    sleep 2
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}"
+    exit 1
+esac
+
+exit 0

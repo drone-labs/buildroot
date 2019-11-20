@@ -1,0 +1,80 @@
+diff --git a/arch/arm/boot/dts/am335x-boneblue.dts b/arch/arm/boot/dts/am335x-boneblue.dts
+index c39b478..f543849 100644
+--- a/arch/arm/boot/dts/am335x-boneblue.dts
++++ b/arch/arm/boot/dts/am335x-boneblue.dts
+@@ -5,6 +5,7 @@
+ /dts-v1/;
+ 
+ #include "am33xx.dtsi"
++#include "am335x-uio-pruss.dtsi"
+ #include "am335x-bone-common-universal-pins.dtsi"
+ #include <dt-bindings/interrupt-controller/irq.h>
+ 
+diff --git a/arch/arm/boot/dts/am335x-uio-pruss.dtsi b/arch/arm/boot/dts/am335x-uio-pruss.dtsi
+new file mode 100644
+index 0000000..65dc012
+--- /dev/null
++++ b/arch/arm/boot/dts/am335x-uio-pruss.dtsi
+@@ -0,0 +1,11 @@
++&pruss_soc_bus {
++	compatible = "simple-pm-bus";
++	ti,deassert-hard-reset = "pruss", "pruss";
++	status = "okay";
++};
++
++&pruss {
++	compatible = "ti,pruss-v2";
++	ti,pintc-offset = <0x20000>;
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index 3c75e40..6525766 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -1099,7 +1099,7 @@
+ 		};
+ 
+ 		pruss_soc_bus: pruss-soc-bus@4a326004 {
+-			compatible = "ti,am3356-pruss-soc-bus";
++			/*compatible = "ti,am3356-pruss-soc-bus";*/
+ 			reg = <0x4a326004 0x4>;
+ 			ti,hwmods = "pruss";
+ 			#address-cells = <1>;
+@@ -1108,7 +1108,7 @@
+ 			status = "disabled";
+ 
+ 			pruss: pruss@4a300000 {
+-				compatible = "ti,am3356-pruss";
++				/*compatible = "ti,am3356-pruss";*/
+ 				reg = <0x4a300000 0x80000>;
+ 				interrupts = <20 21 22 23 24 25 26 27>;
+ 				interrupt-names = "host2", "host3", "host4",
+diff --git a/arch/arm/boot/dts/dra7-uio-pruss.dtsi b/arch/arm/boot/dts/dra7-uio-pruss.dtsi
+new file mode 100644
+index 0000000..295804b
+--- /dev/null
++++ b/arch/arm/boot/dts/dra7-uio-pruss.dtsi
+@@ -0,0 +1,23 @@
++&pruss_soc_bus1 {
++	compatible = "simple-pm-bus";
++	status = "okay";
++};
++
++&pruss1 {
++	compatible = "ti,pruss-v2";
++	pruss-instance = "pruss1";
++	ti,pintc-offset = <0x20000>;
++	status = "okay";
++};
++
++&pruss_soc_bus2 {
++	compatible = "simple-pm-bus";
++	status = "okay";
++};
++
++&pruss2 {
++	compatible = "ti,pruss-v2";
++	pruss-instance = "pruss2";
++	ti,pintc-offset = <0x20000>;
++	status = "okay";
++};
