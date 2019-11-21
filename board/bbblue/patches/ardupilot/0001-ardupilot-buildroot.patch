@@ -1,0 +1,63 @@
+diff --git a/libraries/AP_HAL_Linux/GPIO_BBB.cpp b/libraries/AP_HAL_Linux/GPIO_BBB.cpp
+index 3c5830b..8a97a69 100644
+--- a/libraries/AP_HAL_Linux/GPIO_BBB.cpp
++++ b/libraries/AP_HAL_Linux/GPIO_BBB.cpp
+@@ -30,6 +30,7 @@ void GPIO_BBB::init()
+     // Without this, access to deactivated banks (i.e. those with no clock source set up) will (logically) fail with SIGBUS
+     // Idea taken from https://groups.google.com/forum/#!msg/beagleboard/OYFp4EXawiI/Mq6s3sg14HoJ
+ 
++    /* No more needed with a well formed device tree
+     uint8_t bank_enable[3] = { 5, 65, 105 };
+     int export_fd = open("/sys/class/gpio/export", O_WRONLY | O_CLOEXEC);
+     if (export_fd == -1) {
+@@ -39,7 +40,7 @@ void GPIO_BBB::init()
+         dprintf(export_fd, "%u\n", (unsigned)bank_enable[i]);
+     }
+     close(export_fd);
+-
++    */
+ 
+     /* open /dev/mem */
+     if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC|O_CLOEXEC)) < 0) {
+diff --git a/libraries/AP_KDECAN/AP_KDECAN.h b/libraries/AP_KDECAN/AP_KDECAN.h
+index 6870472..d876cee 100644
+--- a/libraries/AP_KDECAN/AP_KDECAN.h
++++ b/libraries/AP_KDECAN/AP_KDECAN.h
+@@ -62,7 +62,8 @@ private:
+     void loop();
+ 
+     bool _initialized;
+-    char _thread_name[9];
++    //char _thread_name[9];
++    char _thread_name[16];
+     uint8_t _driver_index;
+     uavcan::ICanDriver* _can_driver;
+ 
+diff --git a/libraries/AP_UAVCAN/AP_UAVCAN.h b/libraries/AP_UAVCAN/AP_UAVCAN.h
+index 6ec2810..efcab63 100644
+--- a/libraries/AP_UAVCAN/AP_UAVCAN.h
++++ b/libraries/AP_UAVCAN/AP_UAVCAN.h
+@@ -176,7 +176,8 @@ private:
+     uavcan::Node<0> *_node;
+ 
+     uint8_t _driver_index;
+-    char _thread_name[9];
++    //char _thread_name[9];
++    char _thread_name[16];
+     bool _initialized;
+     ///// SRV output /////
+     struct {
+diff --git a/libraries/AP_UAVCAN/AP_UAVCAN_DNA_Server.cpp b/libraries/AP_UAVCAN/AP_UAVCAN_DNA_Server.cpp
+index ca1cd6c..7b5c759 100644
+--- a/libraries/AP_UAVCAN/AP_UAVCAN_DNA_Server.cpp
++++ b/libraries/AP_UAVCAN/AP_UAVCAN_DNA_Server.cpp
+@@ -539,7 +539,8 @@ void AP_UAVCAN_DNA_Server::handleNodeInfo(uint8_t node_id, uint8_t unique_id[],
+ void trampoline_handleNodeInfo(const uavcan::ServiceCallResult<uavcan::protocol::GetNodeInfo>& resp)
+ {
+     uint8_t node_id, unique_id[16] = {0};
+-    char name[15] = {0};
++    //char name[15] = {0};
++    char name[81] = {0};
+ 
+     node_id = resp.getResponse().getSrcNodeID().get();
+ 
