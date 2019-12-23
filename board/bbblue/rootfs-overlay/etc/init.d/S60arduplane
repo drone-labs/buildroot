@@ -9,32 +9,37 @@ shift
 AP_DIR=/usr/bin/ardupilot
 PROGRAM=arduplane
 
-# -A Switch
-AP_CONSOLE="/dev/ttyS1"
-# -B Switch
+
+# -A Switch : uartA
+# AP_CONSOLE="/dev/ttyS1"
+# The Host GCS address
+AP_CONSOLE="udp:192.168.1.43:14550"
+# -B Switch : uartB
 AP_GPS="/dev/ttyS2"
-# -C Switch
+# -C Switch : uartC
 AP_TELEM1="/dev/ttyS5"
-# -D Switch
+# -D Switch : uartD
 #AP_TELEM2="/dev/ttyS5"
-# -E Switch
+# -E Switch : uartE
 #AP_UNAMED1="/dev/ttyS5"
-# -F Switch
+# -F Switch : uartF
 #AP_UNAMED2="/dev/ttyS5"
-# -G Switch
+# -G Switch : uartG
 #AP_UNAMED3="/dev/ttyS5"
-# -H Switch
+# -H Switch : uartH
 #AP_UNAMED4="/dev/ttyS5"
 
-# -l Switch
-AP_LOG_DIR="/var/APM/logs"
-# -t Switch
+# -l Switch : Flight Logs directory
+AP_LOG_DIR="/var/APM/logs"  
+# -t Switch : Terrain data directory
 AP_MAP_DIR="/var/APM/terrain"
-# -M Switch
+# -M Switch : Modules directory
 AP_MOD_DIR="/usr/lib/ardupilot"
+# -s Switch : Parameters storage directory
+AP_PAR_DIR="/var/APM"
 
+# Modules needed by the program
 loadlist="uio uio_pruss uio_pdrv_genirq inv_mpu6050 bmp280 ak8975"
-unloadlist="ak8975 bmp280 inv_mpu6050 uio_pdrv_genirq uio_pruss uio"
 
 # Function to load modules
 function loadmodules {
@@ -53,23 +58,6 @@ function loadmodules {
 }
 # END loadmodules
 
-# Function to unload modules
-function unloadmodules {
-  for module in ${unloadlist}
-    do
-      lsmod | grep ${module} > /dev/null 2>&1
-      if [[ $? -eq 0 ]]; then
-        echo -n "Unloading ${module} ... "
-        rmmod ${module}
-        sleep 0.2
-        echo "OK"
-      else
-        echo "${module} is not loaded"
-      fi
-    done
-}
-# END unloadmodules
-
 #-----------------------------------------------------------------------------------
 case "$VERB" in
   start)
@@ -80,7 +68,7 @@ case "$VERB" in
     # Start program in background
     APPID=`pidof ${PROGRAM}`
     if [ s${APPID} = "s" ]; then
-      ${AP_DIR}/${PROGRAM} -l ${AP_LOG_DIR} -A ${AP_CONSOLE} -B ${AP_GPS} -C ${AP_TELEM1}&
+      ${AP_DIR}/${PROGRAM} -l ${AP_LOG_DIR} -A ${AP_CONSOLE} -B ${AP_GPS} -C ${AP_TELEM1} -s ${AP_PAR_DIR}&
     else
       echo "An instance of ${PROGRAM} is already running..."
     fi
@@ -105,16 +93,8 @@ case "$VERB" in
     $0 start
     ;;
 
-  reload)
-    $0 stop
-    unloadmodules
-    sleep 2
-    loadmodules
-    sleep 2
-    $0 start
-    ;;
   *)
-    echo "Usage: $0 {start|stop|restart|reload}"
+    echo "Usage: $0 {start|stop|restart}"
     exit 1
 esac
 

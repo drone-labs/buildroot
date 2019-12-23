@@ -9,8 +9,6 @@ OLDPWD=$(pwd)
 VERB="$1"
 shift
 
-# A function to unload/reload modules?
-
 case "$VERB" in
   start)
     #echo -n "Starting USB gadget: "
